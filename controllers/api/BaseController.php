@@ -57,7 +57,7 @@
                 }
             }
 
-            die(json_encode($data));
+            die($data);
         }
 
         /** 

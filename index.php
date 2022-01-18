@@ -8,7 +8,7 @@
     $uri = explode( '/', $uri );
 
     //identify the desired endpoint
-    $endpoint = strval($uri[4]);
+    $endpoint = strval($uri[1]);
 
     $requests_allowed = ['POST', 'GET'];
 

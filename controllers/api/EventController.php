@@ -27,7 +27,7 @@
                 $response['destination'] = $balance;
 
                 $this->returnResponse(
-                    $response,
+                    json_encode($response),
                     array('Content-Type: application/json', 'HTTP/1.1 201 OK')
                 );
             } else {
@@ -41,7 +41,7 @@
                         $this->setFileData($data);
 
                         $this->returnResponse(
-                            $response,
+                            json_encode($response),
                             array('Content-Type: application/json', 'HTTP/1.1 201 OK')
                         );
                     }
@@ -49,7 +49,7 @@
             }
         }
 
-        public function withdraw() {
+        public function withdraw($params) {
             $account = $params['origin'];
             $amount = $params['amount'];
 
@@ -57,7 +57,7 @@
 
             if(!$data) {
                 $this->returnResponse(
-                    '',
+                    '0',
                     array('Content-Type: application/json', 'HTTP/1.1 404 OK')
                 );
             } else {
@@ -73,7 +73,7 @@
                         $this->setFileData($data);
 
                         $this->returnResponse(
-                            $response,
+                            json_encode($response),
                             array('Content-Type: application/json', 'HTTP/1.1 201 OK')
                         );
                     }
@@ -81,14 +81,14 @@
 
                 if(!$process) {
                     $this->returnResponse(
-                        '',
+                        '0',
                         array('Content-Type: application/json', 'HTTP/1.1 404 OK')
                     );
                 }
             }
         }
 
-        public function transfer() {
+        public function transfer($params) {
             $origin = $params['origin'];
             $destination = $params['destination'];
             $amount = $params['amount'];
@@ -97,42 +97,51 @@
 
             if(!$data) {
                 $this->returnResponse(
-                    '',
+                    '0',
                     array('Content-Type: application/json', 'HTTP/1.1 404 OK')
                 );
             } else {
                 $balances = $data->balances;
-                $process = !1;
+                $temorigem = !1;
+                $temdestino = !1;
 
                 foreach($balances as $index => $balance) {
                     if($balance->id == $origin) {
-                        $process++;
+                        $temorigem = !0;
                         $indiceorigem = $index;
                     }
                 }
 
                 foreach($balances as $index => $balance) {
                     if($balance->id == $destination) {
-                        $process++;
+                        $temdestino = !0;
                         $indicedestino = $index;
                     }
                 }
 
 
-                if(!$process || $process != 2) {
+                if(!$temorigem) {
                     $this->returnResponse(
-                        '',
+                        '0',
                         array('Content-Type: application/json', 'HTTP/1.1 404 OK')
                     );
                 } else {
                     $data->balances[$indiceorigem]->balance -= $amount; 
-                    $data->balances[$indicedestino]->balance -= $amount; 
+                    if(!$temdestino) {
+                        $balance = ['id' => $destination, 'balance' => $amount];
+                        array_push($data->balances, $balance);
+                        $this->setFileData($data);
+                        $destinationbalance = $balance;
+                    } else {
+                        $data->balances[$indicedestino]->balance += $amount; 
+                        $destinationbalance = $data->balances[$indicedestino];
+                    }
                     $response['origin'] = $data->balances[$indiceorigem];
-                    $response['destination'] = $data->balances[$indicedestino];
+                    $response['destination'] = $destinationbalance;
 
                     $this->setFileData($data);
                     $this->returnResponse(
-                        $response,
+                        json_encode($response),
                         array('Content-Type: application/json', 'HTTP/1.1 201 OK')
                     );
                 }

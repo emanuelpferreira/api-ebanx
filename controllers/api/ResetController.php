@@ -5,7 +5,7 @@
         {
             $this->unlinkFileData();
             $this->returnResponse(
-                '',
+                'OK',
                 array('Content-Type: application/json', 'HTTP/1.1 200 OK')
             );
         }
